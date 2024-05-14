@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.hiltPlugin)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -54,4 +56,7 @@ dependencies {
 
     implementation(libs.bundles.retrofit2)
     implementation(libs.glide)
+
+    implementation(libs.hilt)
+    ksp(libs.hiltCompiler)
 }
