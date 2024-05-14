@@ -3,17 +3,22 @@ package com.example.first_week_mission.repository
 import com.example.first_week_mission.api.PokeApiClient
 import com.example.first_week_mission.api.PokeApiService
 import com.example.first_week_mission.ui.model.PokemonUiModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 object PokemonRepository {
     private val api: PokeApiService = PokeApiClient.api
 
-    suspend fun loadPokemon(fromID: Int, toID: Int): List<PokemonUiModel> {
+    suspend fun loadPokemon(fromID: Int, toID: Int): List<PokemonUiModel> = coroutineScope{
         val size = toID - fromID + 1
         val result = ArrayList<PokemonUiModel>(size)
 
         for (i in fromID..toID) {
-            val pokemonInfo = api.getPokemonInfo(i)
-            val pokemonForm = api.getPokemonForm(i)
+            val infoTask = async { api.getPokemonInfo(i) }
+            val formTask = async { api.getPokemonForm(i) }
+
+            val pokemonInfo = infoTask.await()
+            val pokemonForm = formTask.await()
 
             val koreanName = pokemonInfo.names.find { it.language.name == "ko" }?.name ?: "알 수 없음"
             val description = pokemonInfo.descriptions.find { it.language.name == "ko" }?.description ?: "해당 포켓몬에 대한 설명이 없습니다."
@@ -30,10 +35,10 @@ object PokemonRepository {
             result.add(uiModel)
         }
 
-        return result
+        result
     }
 
-    val typeMapping: Map<String, String> = mapOf(
+    private val typeMapping: Map<String, String> = mapOf(
         "normal" to "노멀",
         "fighting" to "격투",
         "flying" to "비행",
