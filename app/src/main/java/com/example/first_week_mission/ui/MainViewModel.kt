@@ -7,7 +7,6 @@ import com.example.first_week_mission.ui.model.PokemonUiModel
 import com.example.first_week_mission.repository.PokemonRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.util.ArrayList
 
@@ -36,8 +35,7 @@ class MainViewModel : ViewModel() {
         val destination = if (loaded >= MAX_COUNT) 151 else loaded
 
         viewModelScope.launch {
-
-            _dataFlow.emit(MainUiState.Loading)
+            _dataFlow.value = MainUiState.Loading
 
             runCatching {
                 val load = PokemonRepository.loadPokemon(start, destination)
@@ -45,14 +43,9 @@ class MainViewModel : ViewModel() {
                 new.addAll(load)
                 data = new
 
-                _dataFlow.emit(
-                    MainUiState.Success(
-                        data = filteredData,
-                        showOnlyLike = showOnlyLike
-                    )
-                )
+                emitSuccess()
             }.onFailure {
-                _dataFlow.emit(MainUiState.Fail("데이터를 불러오는 데 실패하였습니다."))
+                _dataFlow.value = MainUiState.Fail("데이터를 불러오는 데 실패하였습니다.")
             }
         }
     }
@@ -64,31 +57,22 @@ class MainViewModel : ViewModel() {
 
         data = current
 
-        Log.d("MainViewModel", "setLike $current")
-
-        viewModelScope.launch {
-            _dataFlow.emit(
-                MainUiState.Success(
-                    data = filteredData,
-                    showOnlyLike = showOnlyLike
-                )
-            )
-        }
+        viewModelScope.launch { emitSuccess() }
     }
 
     fun showOnlyLike(arg: Boolean) {
         if (showOnlyLike != arg) {
             showOnlyLike = arg
 
-            viewModelScope.launch {
-                _dataFlow.emit(
-                    MainUiState.Success(
-                        data = filteredData,
-                        showOnlyLike = arg
-                    )
-                )
-            }
+            viewModelScope.launch { emitSuccess() }
         }
+    }
+
+    private fun emitSuccess() {
+        _dataFlow.value = MainUiState.Success(
+            data = filteredData,
+            showOnlyLike = showOnlyLike
+        )
     }
 
     sealed interface MainUiState {
