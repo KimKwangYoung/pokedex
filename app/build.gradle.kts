@@ -56,6 +56,7 @@ dependencies {
 
     implementation(libs.bundles.retrofit2)
     implementation(libs.glide)
+    ksp(libs.glideCompiler)
 
     implementation(libs.hilt)
     ksp(libs.hiltCompiler)
