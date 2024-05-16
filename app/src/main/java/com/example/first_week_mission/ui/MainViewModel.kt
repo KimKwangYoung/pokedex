@@ -1,16 +1,19 @@
 package com.example.first_week_mission.ui
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.first_week_mission.ui.model.PokemonUiModel
 import com.example.first_week_mission.repository.PokemonRepository
+import com.example.first_week_mission.ui.model.PokemonUiModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.util.ArrayList
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val pokemonRepository: PokemonRepository
+): ViewModel() {
     private var loaded: Int = 0
 
     private var data = emptyList<PokemonUiModel>()
@@ -38,7 +41,7 @@ class MainViewModel : ViewModel() {
             _dataFlow.value = MainUiState.Loading
 
             runCatching {
-                val load = PokemonRepository.loadPokemon(start, destination)
+                val load = pokemonRepository.loadPokemon(start, destination)
                 val new = ArrayList(data)
                 new.addAll(load)
                 data = new

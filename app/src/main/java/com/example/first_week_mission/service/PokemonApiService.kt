@@ -1,11 +1,11 @@
-package com.example.first_week_mission.api
+package com.example.first_week_mission.service
 
 import com.example.first_week_mission.model.Pokemon
 import com.example.first_week_mission.model.PokemonForm
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface PokeApiService {
+interface PokemonApiService {
     @GET("pokemon-species/{path}")
     suspend fun getPokemonInfo(
         @Path("path") id: Int
