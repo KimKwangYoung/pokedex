@@ -2,7 +2,9 @@ package com.example.first_week_mission.repository
 
 import com.example.first_week_mission.service.PokemonApiService
 import com.example.first_week_mission.ui.model.PokemonUiModel
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
@@ -12,31 +14,33 @@ class PokemonRepositoryImpl @Inject constructor(
 
     override suspend fun loadPokemon(fromID: Int, toID: Int): List<PokemonUiModel> = coroutineScope{
         val size = toID - fromID + 1
-        val result = ArrayList<PokemonUiModel>(size)
+        val tasks = ArrayList<Deferred<PokemonUiModel>>(size)
 
         for (i in fromID..toID) {
-            val infoTask = async { api.getPokemonInfo(i) }
-            val formTask = async { api.getPokemonForm(i) }
+            val task = async {
 
-            val pokemonInfo = infoTask.await()
-            val pokemonForm = formTask.await()
+                val pokemonInfo = api.getPokemonInfo(i)
+                val pokemonForm = api.getPokemonForm(i)
 
-            val koreanName = pokemonInfo.names.find { it.language.name == "ko" }?.name ?: "알 수 없음"
-            val description = pokemonInfo.descriptions.find { it.language.name == "ko" }?.description ?: "해당 포켓몬에 대한 설명이 없습니다."
+                val koreanName = pokemonInfo.names.find { it.language.name == "ko" }?.name ?: "알 수 없음"
+                val description = pokemonInfo.descriptions.find { it.language.name == "ko" }?.description ?: "해당 포켓몬에 대한 설명이 없습니다."
 
-            val uiModel = PokemonUiModel(
-                id = i,
-                name = koreanName,
-                description = description,
-                imageUrl = pokemonForm.images.defaultImage,
-                type = pokemonForm.types.map { typeMapping[it.type.name] ?: "알 수 없음" },
-                like = false
-            )
+                val uiModel = PokemonUiModel(
+                    id = i,
+                    name = koreanName,
+                    description = description,
+                    imageUrl = pokemonForm.images.defaultImage,
+                    type = pokemonForm.types.map { typeMapping[it.type.name] ?: "알 수 없음" },
+                    like = false
+                )
 
-            result.add(uiModel)
+                uiModel
+            }
+
+            tasks.add(task)
         }
 
-        result
+        tasks.awaitAll().sortedBy { it.id }
     }
 
     private val typeMapping: Map<String, String> = mapOf(
