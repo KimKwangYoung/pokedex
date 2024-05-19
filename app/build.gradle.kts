@@ -58,6 +58,9 @@ dependencies {
     implementation(libs.glide)
     ksp(libs.glideCompiler)
 
+    implementation(libs.aac.room)
+    ksp(libs.aac.roomCompiler)
+
     implementation(libs.hilt)
     ksp(libs.hiltCompiler)
 }
