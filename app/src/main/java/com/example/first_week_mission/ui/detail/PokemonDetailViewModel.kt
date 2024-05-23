@@ -40,7 +40,6 @@ class PokemonDetailViewModel @Inject constructor(
                 _state.value = UiState.Fail(it.message ?: "정보를 불러오는 데 실패하였습니다.")
             }.onSuccess {
                 val old = _state.value
-                Log.d("PokemonDetail", "data equals ${old == UiState.Success(data = it)}")
                 _state.value = UiState.Success(data = it)
             }
         }

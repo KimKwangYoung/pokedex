@@ -9,7 +9,6 @@ import com.example.first_week_mission.local.entity.Like
 import com.example.first_week_mission.service.PokemonApiService
 import com.example.first_week_mission.domain.model.PokemonSummary
 import com.example.first_week_mission.domain.model.Stat
-import com.example.first_week_mission.model.AbilityInfo
 import com.example.first_week_mission.model.AbilityResponse
 import com.example.first_week_mission.model.StatResponse
 import kotlinx.coroutines.CoroutineScope
@@ -46,12 +45,12 @@ internal class PokemonRepositoryImpl @Inject constructor(
     override val dataFlow: StateFlow<List<Pokemon>>
         get() = _cacheData
 
+    private var updating = false
+
     init {
         coroutineScope.launch {
             flowLike.collect{
                 cacheLike = it
-
-                Log.d("PokemonRepository", it.toString())
 
                 val data = ArrayList(_cacheData.value)
 
@@ -65,6 +64,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
                 }
 
                 _cacheData.value = data
+                updating = false
             }
         }
     }
@@ -75,6 +75,10 @@ internal class PokemonRepositoryImpl @Inject constructor(
         _cacheData.value = new
     }
     override suspend fun getPokemonDetail(id: Int): PokemonDetail {
+        while (updating) {
+            //none --> 업데이트가 완료될 때까지 대기
+        }
+
         val data = _cacheData.value.first { it.id == id }
 
         if (data is PokemonDetail) {
@@ -173,11 +177,21 @@ internal class PokemonRepositoryImpl @Inject constructor(
     }
 
     override suspend fun like(id: Int) {
-        likeDao.insertLike(Like(id = id))
+        updating = true
+        try {
+            likeDao.insertLike(Like(id = id))
+        } catch (e: Exception) {
+            updating = false
+        }
     }
 
     override suspend fun unlike(id: Int) {
-        likeDao.deleteLike(Like(id = id))
+        updating = true
+        try {
+            likeDao.deleteLike(Like(id = id))
+        } catch (e: Exception) {
+            updating = false
+        }
     }
 
     private val typeMapping: Map<String, String> = mapOf(
