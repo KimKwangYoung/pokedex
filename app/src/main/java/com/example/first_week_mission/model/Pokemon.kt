@@ -5,17 +5,12 @@ import com.google.gson.annotations.SerializedName
 data class Pokemon(
     val id: Int,
     val names: List<PokemonName>,
-    @SerializedName("flavor_text_entries") val descriptions: List<Description>
+    @SerializedName("flavor_text_entries") val descriptions: List<FlavorText>
 )
 
 data class PokemonName(
     val name: String,
-    val language: Language
-)
-
-data class Description(
-    @SerializedName("flavor_text") val description: String,
-    val language: Language
+    val language: Info
 )
 
 data class PokemonForm(

@@ -6,15 +6,16 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.first_week_mission.local.entity.Like
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LikeDao {
     @Query("SELECT * FROM `like`")
-    fun getLikes()
+    fun getLikes(): Flow<List<Like>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertLike(like: Like)
+    suspend fun insertLike(like: Like)
 
     @Delete
-    fun deleteLike(like: Like)
+    suspend fun deleteLike(like: Like)
 }

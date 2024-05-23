@@ -1,18 +1,36 @@
 package com.example.first_week_mission.service
 
+import com.example.first_week_mission.model.AbilityResponse
 import com.example.first_week_mission.model.Pokemon
 import com.example.first_week_mission.model.PokemonForm
+import com.example.first_week_mission.model.PokemonResponse
+import com.example.first_week_mission.model.StatResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface PokemonApiService {
-    @GET("pokemon-species/{path}")
+internal interface PokemonApiService {
+    @GET("pokemon-species/{id}")
     suspend fun getPokemonInfo(
-        @Path("path") id: Int
+        @Path("id") id: Int
     ): Pokemon
 
-    @GET("pokemon-form/{path}")
+    @GET("pokemon-form/{id}")
     suspend fun getPokemonForm(
-        @Path("path") id: Int,
+        @Path("id") id: Int,
     ): PokemonForm
+
+    @GET("pokemon/{id}")
+    suspend fun getPokemon(
+        @Path("id") id: Int
+    ): PokemonResponse
+
+    @GET("ability/{name}")
+    suspend fun getAbility(
+        @Path("name") name: String
+    ): AbilityResponse
+
+    @GET("stat/{name}")
+    suspend fun getStat(
+        @Path("name") name: String
+    ): StatResponse
 }

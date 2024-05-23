@@ -13,7 +13,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object PokemonServiceModule {
+internal object PokemonServiceModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {

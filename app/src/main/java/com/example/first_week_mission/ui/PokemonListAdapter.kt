@@ -1,6 +1,6 @@
 package com.example.first_week_mission.ui
 
-import android.util.Log
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -10,11 +10,12 @@ import com.bumptech.glide.Glide
 import com.example.first_week_mission.R
 import com.example.first_week_mission.databinding.ViewholderDefaultBinding
 import com.example.first_week_mission.databinding.ViewholderLikeBinding
-import com.example.first_week_mission.ui.model.PokemonUiModel
+import com.example.first_week_mission.domain.model.Pokemon
+import com.example.first_week_mission.ui.detail.PokemonDetailActivity
 
 class PokemonListAdapter(
-    private val onClickLikeButton: (pokemon: PokemonUiModel, like: Boolean) -> Unit
-) : ListAdapter<PokemonUiModel, ViewHolder>(PokemonDiffUtil()) {
+    private val onClickLikeButton: (pokemon: Pokemon, like: Boolean) -> Unit
+) : ListAdapter<Pokemon, ViewHolder>(PokemonDiffUtil()) {
 
     private var showOnlyLike = false
 
@@ -53,12 +54,12 @@ class PokemonListAdapter(
         }
     }
 
-    private class PokemonDiffUtil : DiffUtil.ItemCallback<PokemonUiModel>() {
-        override fun areItemsTheSame(oldItem: PokemonUiModel, newItem: PokemonUiModel): Boolean {
+    private class PokemonDiffUtil : DiffUtil.ItemCallback<Pokemon>() {
+        override fun areItemsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: PokemonUiModel, newItem: PokemonUiModel): Boolean {
+        override fun areContentsTheSame(oldItem: Pokemon, newItem: Pokemon): Boolean {
             return oldItem == newItem
         }
     }
@@ -71,9 +72,9 @@ class PokemonListAdapter(
 
 private class DefaultViewHolder(
     private val binding: ViewholderDefaultBinding,
-    val onClickLikeButton: (pokemon: PokemonUiModel, like: Boolean) -> Unit
+    val onClickLikeButton: (pokemon: Pokemon, like: Boolean) -> Unit
 ) : ViewHolder(binding.root) {
-    fun bind(pokemon: PokemonUiModel) {
+    fun bind(pokemon: Pokemon) {
         Glide.with(binding.root).load(pokemon.imageUrl).into(binding.ivPokemon)
         binding.tvPokemonName.text = pokemon.name
 
@@ -86,15 +87,27 @@ private class DefaultViewHolder(
         binding.ivLike.setOnClickListener {
             onClickLikeButton(pokemon, !pokemon.like)
         }
+
+        binding.root.setOnClickListener {
+            it.context.startActivity(
+                Intent(
+                    it.context,
+                    PokemonDetailActivity::class.java
+                ).putExtra(
+                    "id",
+                    pokemon.id
+                )
+            )
+        }
         binding.ivLike.setImageResource(likeImageId)
     }
 }
 
 private class LikeViewHolder(
     private val binding: ViewholderLikeBinding,
-    val onClickLikeButton: (pokemon: PokemonUiModel, like: Boolean) -> Unit
+    val onClickLikeButton: (pokemon: Pokemon, like: Boolean) -> Unit
 ) : ViewHolder(binding.root) {
-    fun bind(pokemon: PokemonUiModel) {
+    fun bind(pokemon: Pokemon) {
         Glide.with(binding.root).load(pokemon.imageUrl).into(binding.ivPokemon)
         binding.tvPokemonName.text = pokemon.name
 
@@ -102,6 +115,18 @@ private class LikeViewHolder(
             R.drawable.favorite_24dp
         } else {
             R.drawable.favorite_border_24dp
+        }
+
+        binding.root.setOnClickListener {
+            it.context.startActivity(
+                Intent(
+                    it.context,
+                    PokemonDetailActivity::class.java
+                ).putExtra(
+                    "id",
+                    pokemon.id
+                )
+            )
         }
 
         binding.ivLike.setOnClickListener {

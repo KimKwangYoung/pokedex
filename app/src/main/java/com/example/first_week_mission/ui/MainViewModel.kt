@@ -1,12 +1,15 @@
 package com.example.first_week_mission.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.first_week_mission.domain.model.Pokemon
 import com.example.first_week_mission.repository.PokemonRepository
-import com.example.first_week_mission.ui.model.PokemonUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,11 +17,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val pokemonRepository: PokemonRepository
 ): ViewModel() {
-    private var loaded: Int = 0
+    private var data = emptyList<Pokemon>()
 
-    private var data = emptyList<PokemonUiModel>()
-
-    private val filteredData: List<PokemonUiModel>
+    private val filteredData: List<Pokemon>
         get() = if (showOnlyLike) data.filter { it.like } else data
 
     private val _dataFlow: MutableStateFlow<MainUiState> = MutableStateFlow(MainUiState.Loading)
@@ -26,41 +27,39 @@ class MainViewModel @Inject constructor(
 
     private var showOnlyLike = false
 
+    init {
+        pokemonRepository.dataFlow.onEach {
+            data = it
+            emitSuccess()
+        }.launchIn(viewModelScope)
+    }
+
     fun loadPokemon() {
-        val start = loaded + 1
-
-        loaded += LOAD_COUNT
-
-        if (start >= MAX_COUNT) {
-            return
-        }
-
-        val destination = if (loaded >= MAX_COUNT) 151 else loaded
-
         viewModelScope.launch {
             _dataFlow.value = MainUiState.Loading
-
             runCatching {
-                val load = pokemonRepository.loadPokemon(start, destination)
-                val new = ArrayList(data)
-                new.addAll(load)
-                data = new
-
-                emitSuccess()
+                pokemonRepository.loadPokemon()
             }.onFailure {
                 _dataFlow.value = MainUiState.Fail("데이터를 불러오는 데 실패하였습니다.")
             }
         }
     }
 
-    fun setLike(pokemon: PokemonUiModel, like: Boolean) {
-        val current = ArrayList(data)
-        val index = current.indexOf(pokemon)
-        current[index] = pokemon.copy(like = like)
-
-        data = current
-
-        viewModelScope.launch { emitSuccess() }
+    fun setLike(pokemon: Pokemon, like: Boolean) {
+        viewModelScope.launch {
+            runCatching {
+                if (like) {
+                    pokemonRepository.like(pokemon.id)
+                } else {
+                    pokemonRepository.unlike(pokemon.id)
+                }
+            }.onFailure {
+                it.printStackTrace()
+                _dataFlow.value = MainUiState.Fail("다시 시동해주세요.")
+            }.onSuccess {
+                Log.d("MainViewModel", "갱신 성공")
+            }
+        }
     }
 
     fun showOnlyLike(arg: Boolean) {
@@ -82,7 +81,7 @@ class MainViewModel @Inject constructor(
         data object Loading : MainUiState
 
         data class Success(
-            val data: List<PokemonUiModel>,
+            val data: List<Pokemon>,
             val showOnlyLike: Boolean
         ) : MainUiState {
             override fun equals(other: Any?): Boolean {
@@ -97,13 +96,5 @@ class MainViewModel @Inject constructor(
         data class Fail(
             val errorMessage: String
         ) : MainUiState
-    }
-
-    companion object {
-        //1세대 포켓몬만 불러올 수 있다.
-        const val MAX_COUNT = 151
-
-        //한번에 불러올 수 있는 포켓몬 정보 갯수
-        const val LOAD_COUNT = 10
     }
 }
