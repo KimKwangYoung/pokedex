@@ -67,7 +67,7 @@ class PokemonDetailActivity : AppCompatActivity() {
                 viewModel.toggleLike()
                 return true
             }
-            androidx.appcompat.R.id.home -> {
+            android.R.id.home -> {
                 finish()
             }
         }
@@ -98,7 +98,6 @@ class PokemonDetailActivity : AppCompatActivity() {
                     binding.contentScrollView.isVisible = true
 
                     val data = it.data
-                    Log.d("PokemonDetailActivity", data.toString())
                     supportActionBar?.title = data.name
 
                     Glide.with(this).load(data.imageUrl).into(binding.ivPokemon)
@@ -106,7 +105,7 @@ class PokemonDetailActivity : AppCompatActivity() {
                     like = data.like
                     invalidateOptionsMenu()
 
-                    binding.tvTypes.text = "${data.type.joinToString(",")} 타입 포켓몬"
+                    binding.tvTypes.text = "${data.type.joinToString("/")} 타입 포켓몬"
                     binding.tvDescription.text = data.description
                     statAdapter.data = data.stat.map {stat ->
                         "${stat.name}\n기본 스탯 : ${stat.baseStat}"
