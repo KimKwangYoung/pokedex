@@ -115,6 +115,10 @@ class PokemonDetailActivity : AppCompatActivity() {
                 }
             }
         }.launchIn(lifecycleScope)
+
+        viewModel.event.onEach {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        }.launchIn(lifecycleScope)
     }
 
     private fun initActionbar() {
