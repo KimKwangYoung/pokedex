@@ -7,4 +7,4 @@ data class PokemonSummary(
     override val type: List<String>,
     override val like: Boolean,
     override val imageUrl: String
-): Pokemon
+) : Pokemon

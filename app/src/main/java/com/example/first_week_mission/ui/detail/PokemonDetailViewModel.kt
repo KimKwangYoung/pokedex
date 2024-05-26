@@ -1,6 +1,5 @@
 package com.example.first_week_mission.ui.detail
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PokemonDetailViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val repository: PokemonRepository
 ): ViewModel() {
 
@@ -39,7 +38,6 @@ class PokemonDetailViewModel @Inject constructor(
             }.onFailure {
                 _state.value = UiState.Fail(it.message ?: "정보를 불러오는 데 실패하였습니다.")
             }.onSuccess {
-                val old = _state.value
                 _state.value = UiState.Success(data = it)
             }
         }

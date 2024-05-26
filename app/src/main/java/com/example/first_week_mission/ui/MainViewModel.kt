@@ -28,10 +28,10 @@ class MainViewModel @Inject constructor(
     private var showOnlyLike = false
 
     init {
-        pokemonRepository.dataFlow.onEach {
+        pokemonRepository.addDataChangeListener(this) {
             data = it
             emitSuccess()
-        }.launchIn(viewModelScope)
+        }
     }
 
     fun loadPokemon() {
@@ -75,6 +75,11 @@ class MainViewModel @Inject constructor(
             data = filteredData,
             showOnlyLike = showOnlyLike
         )
+    }
+
+    override fun onCleared() {
+        pokemonRepository.clear()
+        super.onCleared()
     }
 
     sealed interface MainUiState {

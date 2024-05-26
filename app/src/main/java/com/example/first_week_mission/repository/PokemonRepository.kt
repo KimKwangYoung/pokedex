@@ -5,8 +5,6 @@ import com.example.first_week_mission.domain.model.PokemonDetail
 import kotlinx.coroutines.flow.StateFlow
 
 interface PokemonRepository {
-
-    val dataFlow: StateFlow<List<Pokemon>>
     suspend fun loadPokemon()
 
     suspend fun getPokemonDetail(id: Int): PokemonDetail
@@ -14,4 +12,14 @@ interface PokemonRepository {
     suspend fun like(id: Int)
 
     suspend fun unlike(id: Int)
+
+    fun addDataChangeListener(receiver: Any, listener: DataChangeListener)
+
+    fun removeDataChangeListener(receiver: Any)
+
+    fun clear()
+
+    fun interface DataChangeListener {
+        fun onDataChanged(data: List<Pokemon>)
+    }
 }

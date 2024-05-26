@@ -1,6 +1,5 @@
 package com.example.first_week_mission.repository
 
-import android.util.Log
 import com.example.first_week_mission.domain.model.Pokemon
 import com.example.first_week_mission.domain.model.PokemonDetail
 import com.example.first_week_mission.local.AppDatabase
@@ -11,16 +10,10 @@ import com.example.first_week_mission.domain.model.PokemonSummary
 import com.example.first_week_mission.domain.model.Stat
 import com.example.first_week_mission.model.AbilityResponse
 import com.example.first_week_mission.model.StatResponse
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class PokemonRepositoryImpl @Inject constructor(
@@ -34,52 +27,26 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     private val likeDao: LikeDao = database.dao()
 
-    private val flowLike: Flow<List<Like>> = likeDao.getLikes()
-
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
     private var cacheLike = emptyList<Like>()
 
-    private val _cacheData = MutableStateFlow<List<Pokemon>>(emptyList())
+    private var cacheData = emptyList<Pokemon>()
 
-    override val dataFlow: StateFlow<List<Pokemon>>
-        get() = _cacheData
+    private val listeners = mutableMapOf<Int, PokemonRepository.DataChangeListener>()
 
-    private var updating = false
-
-    init {
-        coroutineScope.launch {
-            flowLike.collect{
-                cacheLike = it
-
-                val data = ArrayList(_cacheData.value)
-
-                for (i in data.indices) {
-                    val old = data[i]
-                    val like = cacheLike.find { like -> like.id == old.id } != null
-                    when(old) {
-                        is PokemonDetail -> data[i] = old.copy(like = like)
-                        is PokemonSummary -> data[i] = old.copy(like = like)
-                    }
-                }
-
-                _cacheData.value = data
-                updating = false
-            }
-        }
-    }
     override suspend fun loadPokemon() {
+        if (page == 0) {
+            cacheLike = likeDao.getLikes()
+        }
+
         val loadedData = loadMore()
-        val new = ArrayList(_cacheData.value)
+        val new = ArrayList(cacheData)
         new.addAll(loadedData)
-        _cacheData.value = new
+        cacheData = new
+
+        notifyDataChanged()
     }
     override suspend fun getPokemonDetail(id: Int): PokemonDetail {
-        while (updating) {
-            //none --> 업데이트가 완료될 때까지 대기
-        }
-
-        val data = _cacheData.value.first { it.id == id }
+        val data = cacheData.first { it.id == id }
 
         if (data is PokemonDetail) {
             return data
@@ -87,10 +54,10 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
         val summary = data as PokemonSummary
         val detail = loadPokemonDetailData(summary)
-        val cache = ArrayList(_cacheData.value)
+        val cache = ArrayList(cacheData)
         val index = cache.indexOfFirst { it.id == id }
         cache[index] = detail
-        _cacheData.value = cache
+        cacheData = cache
 
         return detail
     }
@@ -177,21 +144,53 @@ internal class PokemonRepositoryImpl @Inject constructor(
     }
 
     override suspend fun like(id: Int) {
-        updating = true
-        try {
-            likeDao.insertLike(Like(id = id))
-        } catch (e: Exception) {
-            updating = false
-        }
+        likeDao.insertLike(Like(id = id))
+        cacheLike = likeDao.getLikes()
+        changeLike(id)
+        notifyDataChanged()
     }
 
     override suspend fun unlike(id: Int) {
-        updating = true
-        try {
-            likeDao.deleteLike(Like(id = id))
-        } catch (e: Exception) {
-            updating = false
+        likeDao.deleteLike(Like(id = id))
+        cacheLike = likeDao.getLikes()
+        changeLike(id)
+        notifyDataChanged()
+    }
+
+    override fun addDataChangeListener(receiver: Any, listener: PokemonRepository.DataChangeListener) {
+        listeners[receiver.hashCode()] = listener
+    }
+
+    override fun clear() {
+        listeners.clear()
+    }
+
+    private fun changeLike(id: Int) {
+        val mutable = ArrayList(cacheData)
+        val element = mutable.first { it.id == id }
+        val index = mutable.indexOfFirst { it.id == id }
+        val isLike = cacheLike.find { it.id == id } != null
+
+        mutable[index] = when(element) {
+            is PokemonSummary -> {
+                element.copy(like = isLike)
+            }
+            is PokemonDetail -> {
+                element.copy(like = isLike)
+            }
         }
+
+        cacheData = mutable
+    }
+
+    private fun notifyDataChanged() {
+        listeners.values.forEach {
+            it.onDataChanged(cacheData)
+        }
+    }
+
+    override fun removeDataChangeListener(receiver: Any) {
+        listeners.remove(receiver.hashCode())
     }
 
     private val typeMapping: Map<String, String> = mapOf(

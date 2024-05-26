@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface LikeDao {
     @Query("SELECT * FROM `like`")
-    fun getLikes(): Flow<List<Like>>
+    suspend fun getLikes(): List<Like>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLike(like: Like)

@@ -9,4 +9,3 @@ data class PokemonDetail(
     override val like: Boolean
 ): Pokemon by pokemonSummary
 
-

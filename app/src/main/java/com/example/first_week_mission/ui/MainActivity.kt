@@ -54,8 +54,6 @@ class MainActivity : AppCompatActivity() {
                     (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
                 val itemCount = recyclerView.adapter!!.itemCount
 
-                Log.d("MainActivity", "onScrolled :: $lastVisibleItemPosition / $itemCount")
-
                 if (itemCount - lastVisibleItemPosition == 1) {
                     if (mainViewModel.dataFlow.value != MainViewModel.MainUiState.Loading &&
                         (mainViewModel.dataFlow.value is MainViewModel.MainUiState.Success && !(mainViewModel.dataFlow.value as MainViewModel.MainUiState.Success).showOnlyLike)
