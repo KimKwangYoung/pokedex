@@ -1,4 +1,4 @@
-package com.kky.pokedex.repository
+package com.kky.pokedex.domain.repository
 
 import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.domain.model.PokemonDetail
