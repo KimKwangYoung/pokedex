@@ -1,7 +1,7 @@
 package com.kky.pokedex.network.service
 
 import com.kky.pokedex.network.model.AbilityResponse
-import com.kky.pokedex.network.model.Pokemon
+import com.kky.pokedex.network.model.PokemonSpeciesResponse
 import com.kky.pokedex.network.model.PokemonFormResponse
 import com.kky.pokedex.network.model.PokemonResponse
 import com.kky.pokedex.network.model.StatResponse
@@ -12,7 +12,7 @@ interface PokemonApiService {
     @GET("pokemon-species/{id}")
     suspend fun getPokemonInfo(
         @Path("id") id: Int
-    ): Pokemon
+    ): PokemonSpeciesResponse
 
     @GET("pokemon-form/{id}")
     suspend fun getPokemonForm(
