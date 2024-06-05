@@ -3,6 +3,9 @@ import java.net.URI
 include(":network")
 
 
+include(":local")
+
+
 include(":domain")
 
 

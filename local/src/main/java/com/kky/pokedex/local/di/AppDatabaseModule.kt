@@ -1,4 +1,4 @@
-package com.kky.pokedex.di
+package com.kky.pokedex.local.di
 
 import android.content.Context
 import androidx.room.Room
