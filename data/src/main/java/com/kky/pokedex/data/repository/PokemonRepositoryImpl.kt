@@ -1,15 +1,15 @@
-package com.kky.pokedex.repository
+package com.kky.pokedex.data.repository
 
 import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.domain.model.PokemonDetail
-import com.kky.pokedex.local.AppDatabase
-import com.kky.pokedex.local.dao.LikeDao
-import com.kky.pokedex.local.entity.Like
-import com.kky.pokedex.service.PokemonApiService
 import com.kky.pokedex.domain.model.PokemonSummary
 import com.kky.pokedex.domain.model.Stat
-import com.kky.pokedex.model.AbilityResponse
-import com.kky.pokedex.model.StatResponse
+import com.kky.pokedex.domain.repository.PokemonRepository
+import com.kky.pokedex.local.dao.LikeDao
+import com.kky.pokedex.local.model.Like
+import com.kky.pokedex.network.model.AbilityResponse
+import com.kky.pokedex.network.model.StatResponse
+import com.kky.pokedex.network.service.PokemonApiService
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,14 +18,12 @@ import javax.inject.Inject
 
 internal class PokemonRepositoryImpl @Inject constructor(
     private val api: PokemonApiService,
-    database: AppDatabase
-): PokemonRepository  {
+    private val likeDao: LikeDao
+): PokemonRepository {
 
     private var page = 0
 
     private val perPage = 10
-
-    private val likeDao: LikeDao = database.dao()
 
     private var cacheLike = emptyList<Like>()
 
