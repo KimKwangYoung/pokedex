@@ -2,7 +2,7 @@ package com.kky.pokedex.network.service
 
 import com.kky.pokedex.network.model.AbilityResponse
 import com.kky.pokedex.network.model.Pokemon
-import com.kky.pokedex.network.model.PokemonForm
+import com.kky.pokedex.network.model.PokemonFormResponse
 import com.kky.pokedex.network.model.PokemonResponse
 import com.kky.pokedex.network.model.StatResponse
 import retrofit2.http.GET
@@ -17,7 +17,7 @@ interface PokemonApiService {
     @GET("pokemon-form/{id}")
     suspend fun getPokemonForm(
         @Path("id") id: Int,
-    ): PokemonForm
+    ): PokemonFormResponse
 
     @GET("pokemon/{id}")
     suspend fun getPokemon(

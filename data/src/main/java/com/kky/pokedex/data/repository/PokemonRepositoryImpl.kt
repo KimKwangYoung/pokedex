@@ -6,7 +6,7 @@ import com.kky.pokedex.domain.model.PokemonSummary
 import com.kky.pokedex.domain.model.Stat
 import com.kky.pokedex.domain.repository.PokemonRepository
 import com.kky.pokedex.local.dao.LikeDao
-import com.kky.pokedex.local.model.Like
+import com.kky.pokedex.local.model.LikeEntity
 import com.kky.pokedex.network.model.AbilityResponse
 import com.kky.pokedex.network.model.StatResponse
 import com.kky.pokedex.network.service.PokemonApiService
@@ -25,7 +25,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     private val perPage = 10
 
-    private var cacheLike = emptyList<Like>()
+    private var cacheLike = emptyList<LikeEntity>()
 
     private var cacheData = emptyList<Pokemon>()
 
@@ -142,14 +142,14 @@ internal class PokemonRepositoryImpl @Inject constructor(
     }
 
     override suspend fun like(id: Int) {
-        likeDao.insertLike(Like(id = id))
+        likeDao.insertLike(LikeEntity(id = id))
         cacheLike = likeDao.getLikes()
         changeLike(id)
         notifyDataChanged()
     }
 
     override suspend fun unlike(id: Int) {
-        likeDao.deleteLike(Like(id = id))
+        likeDao.deleteLike(LikeEntity(id = id))
         cacheLike = likeDao.getLikes()
         changeLike(id)
         notifyDataChanged()
