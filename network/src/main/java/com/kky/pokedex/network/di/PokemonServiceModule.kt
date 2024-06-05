@@ -1,6 +1,6 @@
-package com.kky.pokedex.di
+package com.kky.pokedex.network.di
 
-import com.kky.pokedex.service.PokemonApiService
+import com.kky.pokedex.network.service.PokemonApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

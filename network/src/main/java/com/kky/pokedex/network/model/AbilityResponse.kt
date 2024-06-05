@@ -1,4 +1,4 @@
-package com.kky.pokedex.model
+package com.kky.pokedex.network.model
 
 import com.google.gson.annotations.SerializedName
 

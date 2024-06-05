@@ -1,14 +1,14 @@
-package com.kky.pokedex.service
+package com.kky.pokedex.network.service
 
-import com.kky.pokedex.model.AbilityResponse
-import com.kky.pokedex.model.Pokemon
-import com.kky.pokedex.model.PokemonForm
-import com.kky.pokedex.model.PokemonResponse
-import com.kky.pokedex.model.StatResponse
+import com.kky.pokedex.network.model.AbilityResponse
+import com.kky.pokedex.network.model.Pokemon
+import com.kky.pokedex.network.model.PokemonForm
+import com.kky.pokedex.network.model.PokemonResponse
+import com.kky.pokedex.network.model.StatResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-internal interface PokemonApiService {
+interface PokemonApiService {
     @GET("pokemon-species/{id}")
     suspend fun getPokemonInfo(
         @Path("id") id: Int

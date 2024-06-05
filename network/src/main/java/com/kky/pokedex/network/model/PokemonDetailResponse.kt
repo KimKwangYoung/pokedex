@@ -1,8 +1,8 @@
-package com.kky.pokedex.model
+package com.kky.pokedex.network.model
 
 import com.google.gson.annotations.SerializedName
 
-internal data class PokemonResponse(
+data class PokemonResponse(
     val id: Long,
     val stats: List<StatInfo>,
     val abilities: List<AbilityInfo>,
@@ -10,11 +10,11 @@ internal data class PokemonResponse(
     val height: Int
 )
 
-internal data class StatInfo(
+data class StatInfo(
     @SerializedName("base_stat") val baseStat:Int,
     @SerializedName("stat") val stat: Info
 )
 
-internal data class AbilityInfo(
+data class AbilityInfo(
     val ability: Info
 )

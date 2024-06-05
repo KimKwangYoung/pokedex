@@ -1,4 +1,4 @@
-package com.kky.pokedex.model
+package com.kky.pokedex.network.model
 
 data class StatResponse(
     val name: String,

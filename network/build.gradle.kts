@@ -1,22 +1,19 @@
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.hiltPlugin)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hiltPlugin)
 }
 
 android {
-    namespace = "com.kky.pokedex"
+    namespace = "com.kky.pokedex.network"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kky.pokedex"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -35,33 +32,18 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
-    viewBinding {
-        enable = true
-    }
 }
 
 dependencies {
 
-    implementation(project(":domain"))
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.androidx.activity)
-    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    implementation(libs.fragment.ktx)
-
-    implementation(libs.glide)
-    ksp(libs.glideCompiler)
-
-    implementation(libs.aac.room)
-    implementation(libs.aac.room.ktx)
-    ksp(libs.aac.roomCompiler)
+    implementation(libs.bundles.retrofit2)
 
     implementation(libs.hilt)
     ksp(libs.hiltCompiler)
