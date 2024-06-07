@@ -1,5 +1,18 @@
 import java.net.URI
 
+include(":data")
+
+
+include(":network")
+
+
+include(":local")
+
+
+include(":domain")
+
+
+
 pluginManagement {
     repositories {
         google {
@@ -27,6 +40,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "first_week_mission"
+rootProject.name = "pokedex"
 include(":app")
  
