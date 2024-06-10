@@ -1,6 +1,5 @@
 package com.kky.pokedex.data.repository
 
-import android.util.Log
 import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.domain.model.PokemonDetail
 import com.kky.pokedex.domain.model.PokemonSummary
@@ -25,7 +24,7 @@ import javax.inject.Inject
 internal class PokemonRepositoryImpl @Inject constructor(
     private val api: PokemonApiService,
     private val likeDao: LikeDao
-): PokemonRepository {
+) : PokemonRepository {
 
     private var page = 0
 
@@ -33,19 +32,24 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     private val cacheData = MutableStateFlow<List<Pokemon>>(emptyList())
 
+    private val flowShowOnlyLike = MutableStateFlow(false)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun flowPokemon(): Flow<List<Pokemon>> = cacheData.flatMapLatest { pokemon ->
         likeDao.getLikes().map {
-            Log.d("PokemonRepository", it.toString())
             it to pokemon
         }
     }.map { (likes, data) ->
         data.map { item ->
             val like = likes.firstOrNull { it.id == item.id } != null
-            when(item) {
+            when (item) {
                 is PokemonSummary -> item.copy(like = like)
                 is PokemonDetail -> item.copy(like = like)
             }
+        }
+    }.flatMapLatest { pokemon ->
+        flowShowOnlyLike.map { showOnlyLike ->
+            if (showOnlyLike) pokemon.filter { item -> item.like } else pokemon
         }
     }
 
@@ -74,6 +78,10 @@ internal class PokemonRepositoryImpl @Inject constructor(
             }
     }
 
+    override fun setShowOnlyLike(showOnlyLike: Boolean) {
+        flowShowOnlyLike.value = showOnlyLike
+    }
+
     override suspend fun loadPokemon() {
         val loadedData = loadMore()
         val new = ArrayList(cacheData.value)
@@ -81,46 +89,47 @@ internal class PokemonRepositoryImpl @Inject constructor(
         cacheData.value = new
     }
 
-    private suspend fun loadPokemonDetailData(summary: PokemonSummary): PokemonDetail = coroutineScope {
-        val pokemon = api.getPokemon(summary.id)
+    private suspend fun loadPokemonDetailData(summary: PokemonSummary): PokemonDetail =
+        coroutineScope {
+            val pokemon = api.getPokemon(summary.id)
 
-        val abilityTasks = ArrayList<Deferred<AbilityResponse>>(pokemon.abilities.size)
-        val statTasks = ArrayList<Deferred<StatResponse>>(pokemon.stats.size)
+            val abilityTasks = ArrayList<Deferred<AbilityResponse>>(pokemon.abilities.size)
+            val statTasks = ArrayList<Deferred<StatResponse>>(pokemon.stats.size)
 
-        pokemon.abilities.forEach {
-            abilityTasks.add(
-                async { api.getAbility(it.ability.name) }
+            pokemon.abilities.forEach {
+                abilityTasks.add(
+                    async { api.getAbility(it.ability.name) }
+                )
+            }
+
+            pokemon.stats.forEach {
+                statTasks.add(
+                    async { api.getStat(it.stat.name) }
+                )
+            }
+
+            val abilities = abilityTasks.awaitAll().map { response ->
+                response.flavorTexts.first { it.language.name == "ko" }.flavorText
+            }
+
+            val stats = statTasks.awaitAll().map { response ->
+                val baseStat: Int = pokemon.stats.first { it.stat.name == response.name }.baseStat
+                val name: String = response.names.first { it.language.name == "ko" }.name
+                Stat(
+                    baseStat = baseStat,
+                    name = name
+                )
+            }
+
+            PokemonDetail(
+                pokemonSummary = summary,
+                weight = pokemon.weight,
+                height = (pokemon.height / 10).toFloat(),
+                stat = stats,
+                ability = abilities,
+                like = summary.like
             )
         }
-
-        pokemon.stats.forEach {
-            statTasks.add(
-                async { api.getStat(it.stat.name) }
-            )
-        }
-
-        val abilities = abilityTasks.awaitAll().map { response ->
-            response.flavorTexts.first { it.language.name == "ko" }.flavorText
-        }
-
-        val stats = statTasks.awaitAll().map { response ->
-            val baseStat: Int = pokemon.stats.first { it.stat.name == response.name }.baseStat
-            val name: String = response.names.first { it.language.name == "ko" }.name
-            Stat(
-                baseStat = baseStat,
-                name = name
-            )
-        }
-
-        PokemonDetail(
-            pokemonSummary = summary,
-            weight = pokemon.weight,
-            height = (pokemon.height / 10).toFloat(),
-            stat = stats,
-            ability = abilities,
-            like = summary.like
-        )
-    }
 
     private suspend fun loadMore(): List<PokemonSummary> = coroutineScope {
         val size = perPage
@@ -141,8 +150,11 @@ internal class PokemonRepositoryImpl @Inject constructor(
                 val pokemonInfo = api.getPokemonInfo(i)
                 val pokemonForm = api.getPokemonForm(i)
 
-                val koreanName = pokemonInfo.names.find { it.language.name == "ko" }?.name ?: "알 수 없음"
-                val description = pokemonInfo.descriptions.find { it.language.name == "ko" }?.flavorText ?: "해당 포켓몬에 대한 설명이 없습니다."
+                val koreanName =
+                    pokemonInfo.names.find { it.language.name == "ko" }?.name ?: "알 수 없음"
+                val description =
+                    pokemonInfo.descriptions.find { it.language.name == "ko" }?.flavorText
+                        ?: "해당 포켓몬에 대한 설명이 없습니다."
 
                 val uiModel = PokemonSummary(
                     id = i,

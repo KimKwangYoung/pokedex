@@ -9,6 +9,8 @@ interface PokemonRepository {
 
     fun flowPokemonDetail(id: Int): Flow<PokemonDetail>
 
+    fun setShowOnlyLike(showOnlyLike: Boolean)
+
     suspend fun loadPokemon()
 
     suspend fun like(id: Int)

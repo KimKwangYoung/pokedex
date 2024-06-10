@@ -17,10 +17,6 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val pokemonRepository: PokemonRepository
 ) : ViewModel() {
-    private var data = emptyList<Pokemon>()
-
-    private val filteredData: List<Pokemon>
-        get() = if (showOnlyLike) data.filter { it.like } else data
 
     private val _dataFlow: MutableStateFlow<MainUiState> = MutableStateFlow(MainUiState.Loading)
     val dataFlow: StateFlow<MainUiState> = _dataFlow
@@ -68,18 +64,8 @@ class MainViewModel @Inject constructor(
     }
 
     fun showOnlyLike(arg: Boolean) {
-        if (showOnlyLike != arg) {
-            showOnlyLike = arg
-
-            viewModelScope.launch { emitSuccess() }
-        }
-    }
-
-    private fun emitSuccess() {
-        _dataFlow.value = MainUiState.Success(
-            data = filteredData,
-            showOnlyLike = showOnlyLike
-        )
+        showOnlyLike = arg
+        pokemonRepository.setShowOnlyLike(arg)
     }
 
     sealed interface MainUiState {
