@@ -4,17 +4,19 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kky.pokedex.domain.model.Pokemon
-import com.kky.pokedex.domain.repository.PokemonRepository
+import com.kky.pokedex.data.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val pokemonRepository: PokemonRepository
-): ViewModel() {
+) : ViewModel() {
     private var data = emptyList<Pokemon>()
 
     private val filteredData: List<Pokemon>
@@ -26,10 +28,15 @@ class MainViewModel @Inject constructor(
     private var showOnlyLike = false
 
     init {
-        pokemonRepository.addDataChangeListener(this) {
-            data = it
-            emitSuccess()
-        }
+        pokemonRepository.flowPokemon()
+            .onEach {
+                _dataFlow.emit(
+                    MainUiState.Success(
+                        data = it,
+                        showOnlyLike = showOnlyLike
+                    )
+                )
+            }.launchIn(viewModelScope)
     }
 
     fun loadPokemon() {
@@ -73,11 +80,6 @@ class MainViewModel @Inject constructor(
             data = filteredData,
             showOnlyLike = showOnlyLike
         )
-    }
-
-    override fun onCleared() {
-        pokemonRepository.clear()
-        super.onCleared()
     }
 
     sealed interface MainUiState {

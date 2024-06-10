@@ -1,19 +1,25 @@
 package com.kky.pokedex.data.repository
 
+import android.util.Log
 import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.domain.model.PokemonDetail
 import com.kky.pokedex.domain.model.PokemonSummary
 import com.kky.pokedex.domain.model.Stat
-import com.kky.pokedex.domain.repository.PokemonRepository
 import com.kky.pokedex.local.dao.LikeDao
 import com.kky.pokedex.local.model.LikeEntity
 import com.kky.pokedex.network.model.AbilityResponse
 import com.kky.pokedex.network.model.StatResponse
 import com.kky.pokedex.network.service.PokemonApiService
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 internal class PokemonRepositoryImpl @Inject constructor(
@@ -25,39 +31,54 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     private val perPage = 10
 
-    private var cacheLike = emptyList<LikeEntity>()
+    private val cacheData = MutableStateFlow<List<Pokemon>>(emptyList())
 
-    private var cacheData = emptyList<Pokemon>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun flowPokemon(): Flow<List<Pokemon>> = cacheData.flatMapLatest { pokemon ->
+        likeDao.getLikes().map {
+            Log.d("PokemonRepository", it.toString())
+            it to pokemon
+        }
+    }.map { (likes, data) ->
+        data.map { item ->
+            val like = likes.firstOrNull { it.id == item.id } != null
+            when(item) {
+                is PokemonSummary -> item.copy(like = like)
+                is PokemonDetail -> item.copy(like = like)
+            }
+        }
+    }
 
-    private val listeners = mutableMapOf<Int, PokemonRepository.DataChangeListener>()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun flowPokemonDetail(id: Int): Flow<PokemonDetail> = flow {
+        val existed = cacheData.value.first { it.id == id }
+
+        if (existed is PokemonDetail) {
+            emit(existed)
+        } else {
+            val summary = existed as PokemonSummary
+            val detail = loadPokemonDetailData(summary)
+            val cache = ArrayList(cacheData.value)
+            val index = cache.indexOfFirst { it.id == id }
+            cache[index] = detail
+            cacheData.value = cache
+
+            emit(detail)
+        }
+    }.flatMapLatest { existed ->
+        likeDao.getLikes()
+            .map { like ->
+                existed.copy(
+                    like = like.find { it.id == existed.id } != null
+                )
+            }
+    }
 
     override suspend fun loadPokemon() {
-        if (page == 0) {
-            cacheLike = likeDao.getLikes()
-        }
-
         val loadedData = loadMore()
-        val new = ArrayList(cacheData)
+        val new = ArrayList(cacheData.value)
         new.addAll(loadedData)
-        cacheData = new
-
-        notifyDataChanged()
-    }
-    override suspend fun getPokemonDetail(id: Int): PokemonDetail {
-        val data = cacheData.first { it.id == id }
-
-        if (data is PokemonDetail) {
-            return data
-        }
-
-        val summary = data as PokemonSummary
-        val detail = loadPokemonDetailData(summary)
-        val cache = ArrayList(cacheData)
-        val index = cache.indexOfFirst { it.id == id }
-        cache[index] = detail
-        cacheData = cache
-
-        return detail
+        cacheData.value = new
     }
 
     private suspend fun loadPokemonDetailData(summary: PokemonSummary): PokemonDetail = coroutineScope {
@@ -97,7 +118,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
             height = (pokemon.height / 10).toFloat(),
             stat = stats,
             ability = abilities,
-            like = cacheLike.find { it.id == summary.id } != null
+            like = summary.like
         )
     }
 
@@ -129,7 +150,7 @@ internal class PokemonRepositoryImpl @Inject constructor(
                     description = description,
                     imageUrl = pokemonForm.images.defaultImage,
                     type = pokemonForm.types.map { typeMapping[it.type.name] ?: "알 수 없음" },
-                    like = cacheLike.find { it.id == i } != null
+                    like = false
                 )
 
                 uiModel
@@ -143,52 +164,10 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     override suspend fun like(id: Int) {
         likeDao.insertLike(LikeEntity(id = id))
-        cacheLike = likeDao.getLikes()
-        changeLike(id)
-        notifyDataChanged()
     }
 
     override suspend fun unlike(id: Int) {
         likeDao.deleteLike(LikeEntity(id = id))
-        cacheLike = likeDao.getLikes()
-        changeLike(id)
-        notifyDataChanged()
-    }
-
-    override fun addDataChangeListener(receiver: Any, listener: PokemonRepository.DataChangeListener) {
-        listeners[receiver.hashCode()] = listener
-    }
-
-    override fun clear() {
-        listeners.clear()
-    }
-
-    private fun changeLike(id: Int) {
-        val mutable = ArrayList(cacheData)
-        val element = mutable.first { it.id == id }
-        val index = mutable.indexOfFirst { it.id == id }
-        val isLike = cacheLike.find { it.id == id } != null
-
-        mutable[index] = when(element) {
-            is PokemonSummary -> {
-                element.copy(like = isLike)
-            }
-            is PokemonDetail -> {
-                element.copy(like = isLike)
-            }
-        }
-
-        cacheData = mutable
-    }
-
-    private fun notifyDataChanged() {
-        listeners.values.forEach {
-            it.onDataChanged(cacheData)
-        }
-    }
-
-    override fun removeDataChangeListener(receiver: Any) {
-        listeners.remove(receiver.hashCode())
     }
 
     private val typeMapping: Map<String, String> = mapOf(
