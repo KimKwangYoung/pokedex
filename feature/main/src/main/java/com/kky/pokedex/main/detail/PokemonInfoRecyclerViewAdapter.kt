@@ -1,11 +1,11 @@
-package com.kky.pokedex.ui.detail
+package com.kky.pokedex.main.detail
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.kky.pokedex.databinding.ItemPokemonInfoBinding
+import com.kky.pokedex.main.databinding.ItemPokemonInfoBinding
 
 class PokemonInfoRecyclerViewAdapter(
 ): RecyclerView.Adapter<PokemonInfoRecyclerViewAdapter.InfoViewHolder>() {

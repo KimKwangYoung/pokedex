@@ -1,4 +1,4 @@
-package com.kky.pokedex.ui.detail
+package com.kky.pokedex.main.detail
 
 import android.os.Bundle
 import android.view.Menu
@@ -14,8 +14,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.kky.pokedex.R
-import com.kky.pokedex.databinding.ActivityPokemonDetailBinding
+import com.kky.pokedex.main.R
+import com.kky.pokedex.main.databinding.ActivityPokemonDetailBinding
+import com.kky.pokedex.ui.detail.PokemonDetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

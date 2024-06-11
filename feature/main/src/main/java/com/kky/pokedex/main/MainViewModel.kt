@@ -1,4 +1,4 @@
-package com.kky.pokedex.ui
+package com.kky.pokedex.main
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

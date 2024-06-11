@@ -1,4 +1,4 @@
-package com.kky.pokedex.ui
+package com.kky.pokedex.main
 
 import android.os.Bundle
 import android.util.Log
@@ -14,8 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.kky.pokedex.R
-import com.kky.pokedex.databinding.ActivityMainBinding
+import com.kky.pokedex.main.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
