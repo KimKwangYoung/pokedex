@@ -1,7 +1,7 @@
 package com.kky.pokedex.data.di
 
 import com.kky.pokedex.data.repository.PokemonRepositoryImpl
-import com.kky.pokedex.domain.repository.PokemonRepository
+import com.kky.pokedex.data.repository.PokemonRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

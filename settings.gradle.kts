@@ -1,5 +1,11 @@
 import java.net.URI
 
+include(":feature:main")
+
+
+include(":feature")
+
+
 include(":data")
 
 

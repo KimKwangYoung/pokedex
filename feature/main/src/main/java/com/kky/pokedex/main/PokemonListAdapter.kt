@@ -1,4 +1,4 @@
-package com.kky.pokedex.ui
+package com.kky.pokedex.main
 
 import android.content.Intent
 import android.view.LayoutInflater
@@ -7,11 +7,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
-import com.kky.pokedex.R
-import com.kky.pokedex.databinding.ViewholderDefaultBinding
-import com.kky.pokedex.databinding.ViewholderLikeBinding
 import com.kky.pokedex.domain.model.Pokemon
-import com.kky.pokedex.ui.detail.PokemonDetailActivity
+import com.kky.pokedex.main.databinding.ViewholderDefaultBinding
+import com.kky.pokedex.main.databinding.ViewholderLikeBinding
+import com.kky.pokedex.main.detail.PokemonDetailActivity
 
 class PokemonListAdapter(
     private val onClickLikeButton: (pokemon: Pokemon, like: Boolean) -> Unit

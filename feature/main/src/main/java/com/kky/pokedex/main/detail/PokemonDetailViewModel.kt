@@ -1,15 +1,18 @@
 package com.kky.pokedex.ui.detail
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kky.pokedex.domain.model.PokemonDetail
-import com.kky.pokedex.domain.repository.PokemonRepository
+import com.kky.pokedex.data.repository.PokemonRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,19 +31,10 @@ class PokemonDetailViewModel @Inject constructor(
     val event: SharedFlow<String> = _event
 
     init {
-        getPokemonDetail()
-    }
-
-    private fun getPokemonDetail() {
-        viewModelScope.launch {
-            runCatching {
-                repository.getPokemonDetail(id)
-            }.onFailure {
-                _state.value = UiState.Fail(it.message ?: "정보를 불러오는 데 실패하였습니다.")
-            }.onSuccess {
+        repository.flowPokemonDetail(id)
+            .onEach {
                 _state.value = UiState.Success(data = it)
-            }
-        }
+            }.launchIn(viewModelScope)
     }
 
     fun toggleLike() {
@@ -59,13 +53,14 @@ class PokemonDetailViewModel @Inject constructor(
             }.onFailure {
                 _event.emit("실패하였습니다.")
             }.onSuccess {
-                getPokemonDetail()
+//                getPokemonDetail()
+                Log.d("PokemonDetailViewModel", "좋아요 변경 성공")
             }
         }
     }
 
     sealed interface UiState {
-        object Loading: UiState
+        data object Loading: UiState
 
         data class Success(
             val data: PokemonDetail

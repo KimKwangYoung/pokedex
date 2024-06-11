@@ -1,6 +1,7 @@
-package com.kky.pokedex.ui
+package com.kky.pokedex.main
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -8,14 +9,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.kky.pokedex.R
-import com.kky.pokedex.databinding.ActivityMainBinding
+import com.kky.pokedex.main.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -53,10 +54,12 @@ class MainActivity : AppCompatActivity() {
                     (recyclerView.layoutManager as LinearLayoutManager?)!!.findLastCompletelyVisibleItemPosition()
                 val itemCount = recyclerView.adapter!!.itemCount
 
+                Log.d("MainActivity", "onScrolled :: ${mainViewModel.dataFlow.value::class}")
+
                 if (itemCount - lastVisibleItemPosition == 1) {
                     if (mainViewModel.dataFlow.value != MainViewModel.MainUiState.Loading &&
                         (mainViewModel.dataFlow.value is MainViewModel.MainUiState.Success && !(mainViewModel.dataFlow.value as MainViewModel.MainUiState.Success).showOnlyLike)
-                        ) {
+                    ) {
                         mainViewModel.loadPokemon()
                     }
                 }
@@ -65,27 +68,47 @@ class MainActivity : AppCompatActivity() {
 
         observe()
 
-        mainViewModel.loadPokemon()
+        if (!mainViewModel.initialized) {
+            mainViewModel.loadPokemon()
+        }
     }
 
     private fun observe() {
-        mainViewModel.dataFlow.onEach {
-            binding.progressBar.isVisible = it is MainViewModel.MainUiState.Loading
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.dataFlow.collect {
+                    binding.progressBar.isVisible = it is MainViewModel.MainUiState.Loading
 
-            when (it) {
-                is MainViewModel.MainUiState.Fail -> {
-                    Toast.makeText(this, it.errorMessage, Toast.LENGTH_SHORT).show()
-                }
+                    when (it) {
+                        MainViewModel.MainUiState.Loading -> {}
 
-                MainViewModel.MainUiState.Loading -> {
-                    Toast.makeText(this, "로딩 중...", Toast.LENGTH_SHORT).show()
-                }
-
-                is MainViewModel.MainUiState.Success -> {
-                    pokemonAdapter.showOnlyLike(it.showOnlyLike)
-                    pokemonAdapter.submitList(it.data)
+                        is MainViewModel.MainUiState.Success -> {
+                            pokemonAdapter.showOnlyLike(it.showOnlyLike)
+                            pokemonAdapter.submitList(it.data)
+                        }
+                    }
                 }
             }
-        }.launchIn(lifecycleScope)
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mainViewModel.effect.collect {
+                    when (it) {
+                        is MainViewModel.MainEvent.Fail -> Toast.makeText(
+                            this@MainActivity,
+                            it.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        MainViewModel.MainEvent.Loading -> Toast.makeText(
+                            this@MainActivity,
+                            "로딩 중...",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
     }
 }

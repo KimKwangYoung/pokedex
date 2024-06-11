@@ -6,11 +6,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.kky.pokedex.local.model.LikeEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface LikeDao {
     @Query("SELECT * FROM `like`")
-    suspend fun getLikes(): List<LikeEntity>
+    fun getLikes(): Flow<List<LikeEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertLike(like: LikeEntity)
