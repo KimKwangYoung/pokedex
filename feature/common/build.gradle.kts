@@ -1,12 +1,10 @@
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    alias(libs.plugins.hiltPlugin)
-    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.kky.pokedex.main"
+    namespace = "com.kky.pokedex.feature.common"
     compileSdk = 34
 
     defaultConfig {
@@ -29,32 +27,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = "1.8"
-    }
-
-    viewBinding {
-        enable = true
     }
 }
 
 dependencies {
-    implementation(project(":data"))
-    implementation(project(":domain"))
-    implementation(project(":feature:common"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.fragment.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    implementation(libs.glide)
-    ksp(libs.glideCompiler)
-
-    implementation(libs.hilt)
-    ksp(libs.hiltCompiler)
 }
