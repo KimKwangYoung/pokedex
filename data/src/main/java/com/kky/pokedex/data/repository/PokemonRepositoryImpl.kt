@@ -36,15 +36,13 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun flowPokemon(): Flow<List<Pokemon>> = cacheData.flatMapLatest { pokemon ->
-        likeDao.getLikes().map {
-            it to pokemon
-        }
-    }.map { (likes, data) ->
-        data.map { item ->
-            val like = likes.firstOrNull { it.id == item.id } != null
-            when (item) {
-                is PokemonSummary -> item.copy(like = like)
-                is PokemonDetail -> item.copy(like = like)
+        likeDao.getLikes().map { likes ->
+            pokemon.map { item ->
+                val like = likes.firstOrNull { it.id == item.id } != null
+                when(item) {
+                    is PokemonSummary -> item.copy(like = like)
+                    is PokemonDetail -> item.copy(like = like)
+                }
             }
         }
     }.flatMapLatest { pokemon ->
@@ -69,11 +67,11 @@ internal class PokemonRepositoryImpl @Inject constructor(
 
             emit(detail)
         }
-    }.flatMapLatest { existed ->
+    }.flatMapLatest { pokemon ->
         likeDao.getLikes()
             .map { like ->
-                existed.copy(
-                    like = like.find { it.id == existed.id } != null
+                pokemon.copy(
+                    like = like.find { it.id == pokemon.id } != null
                 )
             }
     }
