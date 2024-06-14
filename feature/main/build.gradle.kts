@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.kky.pokedex.main"
+    namespace = "com.kky.pokedex.feature.main"
     compileSdk = 34
 
     defaultConfig {

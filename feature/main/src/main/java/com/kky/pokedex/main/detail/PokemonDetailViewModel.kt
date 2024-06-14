@@ -1,4 +1,4 @@
-package com.kky.pokedex.ui.detail
+package com.kky.pokedex.main.detail
 
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle

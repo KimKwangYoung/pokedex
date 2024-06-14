@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.kky.pokedex.main.databinding.ItemPokemonInfoBinding
+import com.kky.pokedex.feature.main.databinding.ItemPokemonInfoBinding
 
 class PokemonInfoRecyclerViewAdapter(
 ): RecyclerView.Adapter<PokemonInfoRecyclerViewAdapter.InfoViewHolder>() {
