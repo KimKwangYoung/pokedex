@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
+        <activity android:name="com.kky.pokedex.main.detail.PokemonDetailActivity"
+            android:exported="false"/>
         <activity
-            android:name=".detail.PokemonDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name="com.kky.pokedex.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

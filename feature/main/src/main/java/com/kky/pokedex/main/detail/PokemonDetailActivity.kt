@@ -14,9 +14,8 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.kky.pokedex.main.R
-import com.kky.pokedex.main.databinding.ActivityPokemonDetailBinding
-import com.kky.pokedex.ui.detail.PokemonDetailViewModel
+import com.kky.pokedex.feature.main.R
+import com.kky.pokedex.feature.main.databinding.ActivityPokemonDetailBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach

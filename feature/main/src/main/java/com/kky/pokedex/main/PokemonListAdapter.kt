@@ -8,8 +8,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.kky.pokedex.domain.model.Pokemon
-import com.kky.pokedex.main.databinding.ViewholderDefaultBinding
-import com.kky.pokedex.main.databinding.ViewholderLikeBinding
+import com.kky.pokedex.feature.main.R
+import com.kky.pokedex.feature.main.databinding.ViewholderDefaultBinding
+import com.kky.pokedex.feature.main.databinding.ViewholderLikeBinding
 import com.kky.pokedex.main.detail.PokemonDetailActivity
 
 class PokemonListAdapter(

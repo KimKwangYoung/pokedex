@@ -1,22 +1,14 @@
 import java.net.URI
 
-include(":feature:main")
-
-
-include(":feature")
-
+include(
+    ":feature:common",
+    ":feature:main"
+)
 
 include(":data")
-
-
 include(":network")
-
-
 include(":local")
-
-
 include(":domain")
-
 
 
 pluginManagement {
