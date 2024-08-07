@@ -1,15 +1,3 @@
-import java.net.URI
-
-include(
-    ":feature:common",
-    ":feature:main"
-)
-
-include(":data")
-include(":network")
-include(":local")
-include(":domain")
-
 
 pluginManagement {
     repositories {
@@ -40,4 +28,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "pokedex"
 include(":app")
+include(
+    ":feature:common",
+    ":feature:main"
+)
+
+include(":data")
+include(":network")
+include(":local")
+include(":domain")
  
