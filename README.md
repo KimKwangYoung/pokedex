@@ -5,7 +5,7 @@ Compose Migratrion 진행중입니다.(~ing)
 
 # 아키텍처
 
-안드로이드 권장 아키텍처 기반으로 작성하였습니다.
+안드로이드 권장 아키텍처 기반으로 작성하였습니다.  
 Layer에 맞게 모듈을 분리하고 MVVM Pattern을 적용하였습니다.
 
 ![권장 아키텍처](https://github.com/user-attachments/assets/22737d5b-5d3c-4c97-afab-c630904b884f)
@@ -18,7 +18,6 @@ Layer에 맞게 모듈을 분리하고 MVVM Pattern을 적용하였습니다.
 <p align="center">  <img src="https://github.com/user-attachments/assets/98266cc2-1d67-4b88-8a79-0e85e81b40a0" align="center" width="32%">  
   <img src="https://github.com/user-attachments/assets/8f5d3552-f9e0-4da9-bcd0-958e2fb6e450" align="center" width="32%">  
   <img src="https://github.com/user-attachments/assets/89886465-bf33-4123-a1c9-df4607c655d8" align="center" width="32%">  
-  <figcaption align="center">3개 이미지 띄우기</figcaption>
 </p>
 
 
