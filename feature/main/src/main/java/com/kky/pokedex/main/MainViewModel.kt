@@ -3,9 +3,10 @@ package com.kky.pokedex.main
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.data.repository.PokemonRepository
+import com.kky.pokedex.domain.model.Pokemon
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,10 @@ class MainViewModel @Inject constructor(
     private val pokemonRepository: PokemonRepository
 ) : ViewModel() {
 
-    private val _dataFlow: MutableStateFlow<MainUiState> = MutableStateFlow(MainUiState.Loading)
+    private var showOnlyLike = false
+
+    private val _dataFlow: MutableStateFlow<MainUiState>
+    = MutableStateFlow(MainUiState.Success(data = emptyList(), showOnlyLike = showOnlyLike))
     val dataFlow: StateFlow<MainUiState> = _dataFlow.asStateFlow()
 
     private val _effect: MutableSharedFlow<MainEvent> = MutableSharedFlow(
@@ -32,27 +36,17 @@ class MainViewModel @Inject constructor(
     )
     val effect: SharedFlow<MainEvent> = _effect.asSharedFlow()
 
-    private var showOnlyLike = false
-
-    val initialized: Boolean
-        get() = _dataFlow.value is MainUiState.Success && (_dataFlow.value as MainUiState.Success).data.isNotEmpty()
-
     init {
-        pokemonRepository.flowPokemon()
-            .onEach {
-                _dataFlow.emit(
-                    MainUiState.Success(
-                        data = it,
-                        showOnlyLike = showOnlyLike
-                    )
+        pokemonRepository.flowPokemon().onEach {
+                _dataFlow.value = MainUiState.Success(
+                    data = it.toImmutableList(),
+                    showOnlyLike = showOnlyLike
                 )
             }.launchIn(viewModelScope)
     }
 
     fun loadPokemon() {
         viewModelScope.launch {
-            _effect.tryEmit(MainEvent.Loading)
-            _dataFlow.value = MainUiState.Loading
             runCatching {
                 pokemonRepository.loadPokemon()
             }.onFailure {
@@ -76,7 +70,10 @@ class MainViewModel @Inject constructor(
             }.onFailure {
                 it.printStackTrace()
             }.onSuccess {
-                Log.d("MainViewModel", "갱신 성공")
+                Log.d(
+                    "MainViewModel",
+                    "갱신 성공"
+                )
             }
         }
     }
@@ -87,26 +84,12 @@ class MainViewModel @Inject constructor(
     }
 
     sealed interface MainUiState {
-        data object Loading : MainUiState
-
         data class Success(
-            val data: List<Pokemon>,
-            val showOnlyLike: Boolean
-        ) : MainUiState {
-            override fun equals(other: Any?): Boolean {
-                return super.equals(other)
-            }
-
-            override fun hashCode(): Int {
-                return super.hashCode()
-            }
-        }
+            val data: List<Pokemon>, val showOnlyLike: Boolean
+        ) : MainUiState
     }
 
     sealed interface MainEvent {
-        data class Fail(val message: String): MainEvent
-
-        data object Loading: MainEvent
-
+        data class Fail(val message: String) : MainEvent
     }
 }
