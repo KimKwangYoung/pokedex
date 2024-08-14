@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.hiltPlugin)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -37,6 +38,10 @@ android {
     viewBinding {
         enable = true
     }
+
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
@@ -48,6 +53,16 @@ dependencies {
     implementation(libs.fragment.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.kotlinx.immutable)
+
+    val composeBom = platform(libs.androidx.compose.bom)
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,4 +72,8 @@ dependencies {
 
     implementation(libs.hilt)
     ksp(libs.hiltCompiler)
+    implementation(libs.hilt.navigation.compose)
+
+    implementation(libs.landscapist.bom)
+    implementation(libs.landscapist.coil)
 }
