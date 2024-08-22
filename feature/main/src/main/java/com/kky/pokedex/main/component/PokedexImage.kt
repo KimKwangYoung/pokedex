@@ -5,9 +5,9 @@ import androidx.compose.ui.Modifier
 import com.skydoves.landscapist.coil.CoilImage
 
 @Composable
-fun NetworkImage(
+fun PokedexImage(
     imageUrl: String,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     CoilImage(
         imageModel = { imageUrl },
