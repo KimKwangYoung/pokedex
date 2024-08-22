@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             PokedexTheme {
                 MainScreen()
