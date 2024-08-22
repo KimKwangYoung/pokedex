@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,18 +35,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kky.pokedex.domain.model.Pokemon
-import com.kky.pokedex.feature.common.extension.noEffectClickable
 import com.kky.pokedex.feature.common.theme.PokedexTheme
 import com.kky.pokedex.feature.main.R
-import com.kky.pokedex.main.component.NetworkImage
 import com.kky.pokedex.main.component.PagingLazyColumn
+import com.kky.pokedex.main.component.PokedexImage
 import com.kky.pokedex.main.detail.PokemonDetailActivity
 
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.dataFlow.collectAsStateWithLifecycle()
+    val state by viewModel.dataFlow.collectAsStateWithLifecycle()
+    val uiState = state
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -64,8 +65,7 @@ fun MainScreen(
 
     when (uiState) {
         is MainViewModel.MainUiState.Success -> {
-            val showOnlyLike =
-                (uiState as? MainViewModel.MainUiState.Success)?.showOnlyLike ?: false
+            val showOnlyLike = uiState.showOnlyLike
 
             PokedexTheme {
                 Scaffold(topBar = { MainTopBar() }) { paddingValue ->
@@ -76,13 +76,11 @@ fun MainScreen(
                             modifier = Modifier.padding(paddingValue),
                         ) {
                             LikeFilterBar(
-                                checked = (uiState as? MainViewModel.MainUiState.Success)?.showOnlyLike
-                                    ?: false,
+                                checked = uiState.showOnlyLike,
                                 onCheckedChange = { checked -> viewModel.showOnlyLike(checked) },
                             )
                             MainPokemonList(
-                                data = (uiState as? MainViewModel.MainUiState.Success)?.data
-                                    ?: emptyList(),
+                                data = uiState.data,
                                 showOnlyLike = showOnlyLike,
                                 onClickItem = { pokemon ->
                                     context.startActivity(
@@ -129,30 +127,30 @@ fun LikeFilterBar(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.secondary)
+            .padding(
                 horizontal = 16.dp,
                 vertical = 10.dp,
             )
-        ) {
-            Text(
-                text = "좋아요만 보기",
-                style = MaterialTheme.typography.titleSmall,
+    ) {
+        Text(
+            text = "좋아요만 보기",
+            style = MaterialTheme.typography.titleSmall,
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = SwitchDefaults.colors().copy(
+                uncheckedTrackColor = MaterialTheme.colorScheme.outline,
+                uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                uncheckedThumbColor = MaterialTheme.colorScheme.surface,
             )
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange,
-                colors = SwitchDefaults.colors(
-                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                )
-            )
-        }
+        )
     }
 }
 
@@ -176,7 +174,6 @@ fun MainPokemonList(
             }
         }
     } else {
-
         PagingLazyColumn(
             reachedEnd = data.size == 151,
             loadAction = loadAction,
@@ -207,7 +204,7 @@ fun PokemonLikeListItem(
             .clickable { onClickItem(pokemon) }
             .padding(16.dp),
     ) {
-        NetworkImage(
+        PokedexImage(
             imageUrl = pokemon.imageUrl,
             modifier = Modifier.size(60.dp)
         )
@@ -237,7 +234,7 @@ fun PokemonLikeListItem(
                 else R.drawable.favorite_border_24dp,
             ),
             contentDescription = "",
-            modifier = Modifier.noEffectClickable {
+            modifier = Modifier.clickable {
                 onClickLike(
                     pokemon,
                     !pokemon.like
@@ -255,9 +252,9 @@ fun PokemonListItem(
 ) {
     Row(verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .noEffectClickable { onClickItem(pokemon) }
+            .clickable { onClickItem(pokemon) }
             .padding(16.dp)) {
-        NetworkImage(
+        PokedexImage(
             imageUrl = pokemon.imageUrl,
             modifier = Modifier.size(60.dp)
         )
@@ -273,7 +270,7 @@ fun PokemonListItem(
                 else R.drawable.favorite_border_24dp,
             ),
             contentDescription = "",
-            modifier = Modifier.noEffectClickable {
+            modifier = Modifier.clickable {
                 onClickLike(
                     pokemon,
                     !pokemon.like
