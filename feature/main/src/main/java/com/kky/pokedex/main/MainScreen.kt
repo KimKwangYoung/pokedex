@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -141,48 +142,43 @@ fun MainPokemonList(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val onClickItem = {}
-    if (showOnlyLike) {
-        LazyColumn(modifier = modifier) {
-            items(data) { pokemon ->
-                PokemonListItem(
-                    pokemon = pokemon,
-                    showOnlyLike = showOnlyLike,
-                    onClickItem = {
-                        context.startActivity(
-                            Intent(
-                                context,
-                                PokemonDetailActivity::class.java
-                            ).putExtra(
-                                "id",
-                                pokemon.id
-                            )
+    val listItem: LazyListScope.() -> Unit = {
+        items(
+            data,
+            key = { pokemon -> pokemon.id },
+        ) { pokemon ->
+            PokemonListItem(
+                pokemon = pokemon,
+                showOnlyLike = showOnlyLike,
+                onClickItem = {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            PokemonDetailActivity::class.java
+                        ).putExtra(
+                            "id",
+                            pokemon.id
                         )
-                    },
-                    onClickLike = {
-
-                    }
-                )
-            }
+                    )
+                },
+                onClickLike = {
+                    onClickLike(pokemon)
+                }
+            )
         }
+    }
+
+    if (showOnlyLike) {
+        LazyColumn(
+            content = listItem,
+            modifier = modifier,
+        )
     } else {
         PagingLazyColumn(
             reachedEnd = data.size == 151,
             loadAction = loadAction,
-        ) {
-            items(
-                data,
-                key = { pokemon -> pokemon.id },
-            ) { pokemon ->
-                PokemonListItem(
-                    pokemon = pokemon,
-                    showOnlyLike = showOnlyLike,
-                    onClickItem = onClickItem,
-                    onClickLike = {
-                        onClickLike(pokemon)
-                    }
-                )
-            }
-        }
+            content = listItem,
+            modifier = modifier,
+        )
     }
 }

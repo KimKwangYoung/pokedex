@@ -37,7 +37,8 @@ fun PokemonListItem(
         Spacer(modifier = Modifier.size(10.dp))
         PokemonDescription(
             pokemon = pokemon,
-            showOnlyLike = showOnlyLike
+            showOnlyLike = showOnlyLike,
+            modifier = Modifier.weight(1.0f)
         )
         Image(
             painter = painterResource(

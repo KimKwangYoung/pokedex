@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -23,39 +25,23 @@ fun PagingLazyColumn(
     reachedEnd: Boolean,
     loadAction: () -> Unit,
     content: LazyListScope.() -> Unit,
-) {
-    var pagingState = remember { PagingState(false) }
-
-    if (pagingState.isLoading) {
-        pagingState = PagingState(false)
-    }
-
-    PagingLazyColumnContent(
-        reachedEnd = reachedEnd,
-        loadAction = {
-            pagingState = PagingState(true)
-            loadAction()
-        },
-        pagingState = pagingState,
-        content = content,
-    )
-}
-
-@Composable
-private fun PagingLazyColumnContent(
-    reachedEnd: Boolean,
+    modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
-    pagingState: PagingState,
-    loadAction: () -> Unit,
-    content: LazyListScope.() -> Unit
+    pagingEnable: Boolean = true,
 ) {
-    state.onLoadMore(action = loadAction, isLoading = pagingState.isLoading)
+    if (pagingEnable) {
+        state.onLoadMore(
+            reachedEnd = reachedEnd,
+            action = loadAction
+        )
+    }
 
     LazyColumn(
         state = state,
+        modifier = modifier
     ) {
         content()
-        if (!reachedEnd) item {
+        if (!reachedEnd && pagingEnable) item {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxWidth(),
@@ -71,16 +57,15 @@ private fun LazyListState.reachedBottom(
     triggerOnEnd: Boolean = false,
 ): Boolean {
     val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()
-    return ((triggerOnEnd && lastVisibleItem?.index == layoutInfo.totalItemsCount - 1) ||
-            lastVisibleItem?.index != null && lastVisibleItem.index >= layoutInfo.totalItemsCount - (limitCount + 2))
+    return ((triggerOnEnd && lastVisibleItem?.index == layoutInfo.totalItemsCount - 1) || lastVisibleItem?.index != null && lastVisibleItem.index >= layoutInfo.totalItemsCount - (limitCount + 2))
 }
 
 @SuppressLint("ComposableNaming")
 @Composable
 private fun LazyListState.onLoadMore(
+    reachedEnd: Boolean,
     limitCount: Int = 4,
     loadOnBottom: Boolean = true,
-    isLoading: Boolean,
     action: () -> Unit,
 ) {
     val reached by remember {
@@ -92,11 +77,19 @@ private fun LazyListState.onLoadMore(
         }
     }
 
-    LaunchedEffect(reached) {
-        if (reached && !isLoading) {
+    var lastLoadedCount by remember { mutableIntStateOf(0) }
+
+    val needLoading = lastLoadedCount < layoutInfo.totalItemsCount
+
+    LaunchedEffect(
+        reached,
+        needLoading
+    ) {
+        if (reachedEnd) return@LaunchedEffect
+
+        if (reached && needLoading) {
+            lastLoadedCount = layoutInfo.totalItemsCount
             action()
         }
     }
 }
-
-data class PagingState(val isLoading: Boolean)
