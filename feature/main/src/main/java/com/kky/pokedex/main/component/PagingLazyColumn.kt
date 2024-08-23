@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 fun PagingLazyColumn(
     reachedEnd: Boolean,
     loadAction: () -> Unit,
-    content: LazyListScope.() -> Unit
+    content: LazyListScope.() -> Unit,
 ) {
     var pagingState = remember { PagingState(false) }
 

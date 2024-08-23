@@ -2,25 +2,19 @@ package com.kky.pokedex.main
 
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,17 +24,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.feature.common.theme.PokedexTheme
-import com.kky.pokedex.feature.main.R
 import com.kky.pokedex.main.component.PagingLazyColumn
-import com.kky.pokedex.main.component.PokedexImage
+import com.kky.pokedex.main.component.PokemonListItem
 import com.kky.pokedex.main.detail.PokemonDetailActivity
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
@@ -68,13 +61,22 @@ fun MainScreen(
             val showOnlyLike = uiState.showOnlyLike
 
             PokedexTheme {
-                Scaffold(topBar = { MainTopBar() }) { paddingValue ->
+                Scaffold(topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "1세대 포켓몬 도감",
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        },
+                    )
+                }) { paddingValue ->
                     Box(
-                        modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                        modifier = Modifier
+                            .background(color = MaterialTheme.colorScheme.background)
+                            .padding(paddingValue),
                     ) {
-                        Column(
-                            modifier = Modifier.padding(paddingValue),
-                        ) {
+                        Column {
                             LikeFilterBar(
                                 checked = uiState.showOnlyLike,
                                 onCheckedChange = { checked -> viewModel.showOnlyLike(checked) },
@@ -82,24 +84,13 @@ fun MainScreen(
                             MainPokemonList(
                                 data = uiState.data,
                                 showOnlyLike = showOnlyLike,
-                                onClickItem = { pokemon ->
-                                    context.startActivity(
-                                        Intent(
-                                            context,
-                                            PokemonDetailActivity::class.java
-                                        ).putExtra(
-                                            "id",
-                                            pokemon.id
-                                        )
-                                    )
-                                },
-                                onClickLike = { pokemon, like ->
+                                loadAction = viewModel::loadPokemon,
+                                onClickLike = { pokemon ->
                                     viewModel.setLike(
                                         pokemon,
-                                        like
+                                        !pokemon.like
                                     )
-                                },
-                                loadAction = viewModel::loadPokemon,
+                                }
                             )
                         }
                     }
@@ -107,19 +98,6 @@ fun MainScreen(
             }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainTopBar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = "1세대 포켓몬 도감",
-                style = MaterialTheme.typography.titleMedium,
-            )
-        },
-    )
 }
 
 @Composable
@@ -158,18 +136,32 @@ fun LikeFilterBar(
 fun MainPokemonList(
     data: List<Pokemon>,
     showOnlyLike: Boolean,
-    onClickItem: (Pokemon) -> Unit,
-    onClickLike: (Pokemon, Boolean) -> Unit,
     loadAction: () -> Unit,
+    onClickLike: (Pokemon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+    val onClickItem = {}
     if (showOnlyLike) {
         LazyColumn(modifier = modifier) {
             items(data) { pokemon ->
-                PokemonLikeListItem(
+                PokemonListItem(
                     pokemon = pokemon,
-                    onClickItem = onClickItem,
-                    onClickLike = onClickLike,
+                    showOnlyLike = showOnlyLike,
+                    onClickItem = {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                PokemonDetailActivity::class.java
+                            ).putExtra(
+                                "id",
+                                pokemon.id
+                            )
+                        )
+                    },
+                    onClickLike = {
+
+                    }
                 )
             }
         }
@@ -184,98 +176,13 @@ fun MainPokemonList(
             ) { pokemon ->
                 PokemonListItem(
                     pokemon = pokemon,
+                    showOnlyLike = showOnlyLike,
                     onClickItem = onClickItem,
-                    onClickLike = onClickLike,
+                    onClickLike = {
+                        onClickLike(pokemon)
+                    }
                 )
             }
         }
-    }
-}
-
-@Composable
-fun PokemonLikeListItem(
-    pokemon: Pokemon,
-    onClickItem: (Pokemon) -> Unit,
-    onClickLike: (Pokemon, Boolean) -> Unit,
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable { onClickItem(pokemon) }
-            .padding(16.dp),
-    ) {
-        PokedexImage(
-            imageUrl = pokemon.imageUrl,
-            modifier = Modifier.size(60.dp)
-        )
-        Spacer(modifier = Modifier.size(10.dp))
-        Column(
-            modifier = Modifier.weight(1.0f),
-        ) {
-            Text(
-                text = pokemon.name,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Spacer(modifier = Modifier.size(5.dp))
-            Text(
-                text = "타입: ${pokemon.type.joinToString(", ")}",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Spacer(modifier = Modifier.size(5.dp))
-            Text(
-                text = pokemon.description,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-
-        }
-        Image(
-            painter = painterResource(
-                id = if (pokemon.like) R.drawable.favorite_24dp
-                else R.drawable.favorite_border_24dp,
-            ),
-            contentDescription = "",
-            modifier = Modifier.clickable {
-                onClickLike(
-                    pokemon,
-                    !pokemon.like
-                )
-            },
-        )
-    }
-}
-
-@Composable
-fun PokemonListItem(
-    pokemon: Pokemon,
-    onClickItem: (Pokemon) -> Unit,
-    onClickLike: (Pokemon, Boolean) -> Unit,
-) {
-    Row(verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable { onClickItem(pokemon) }
-            .padding(16.dp)) {
-        PokedexImage(
-            imageUrl = pokemon.imageUrl,
-            modifier = Modifier.size(60.dp)
-        )
-        Spacer(modifier = Modifier.size(10.dp))
-        Text(
-            text = pokemon.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1.0f),
-        )
-        Image(
-            painter = painterResource(
-                id = if (pokemon.like) R.drawable.favorite_24dp
-                else R.drawable.favorite_border_24dp,
-            ),
-            contentDescription = "",
-            modifier = Modifier.clickable {
-                onClickLike(
-                    pokemon,
-                    !pokemon.like
-                )
-            },
-        )
     }
 }
