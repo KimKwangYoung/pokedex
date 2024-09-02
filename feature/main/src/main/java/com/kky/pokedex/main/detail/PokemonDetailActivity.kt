@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -35,23 +36,9 @@ class PokemonDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        binding = ActivityPokemonDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        setContent {
+            DetailScreen()
         }
-
-        binding.rvStat.layoutManager = LinearLayoutManager(this)
-        binding.rvStat.adapter = statAdapter
-
-        binding.rvAbility.layoutManager = LinearLayoutManager(this)
-        binding.rvAbility.adapter = abilityAdapter
-
-        initActionbar()
-        observe()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
