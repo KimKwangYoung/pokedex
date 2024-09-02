@@ -149,30 +149,7 @@ private fun LazyListScope.section(
         )
         Spacer(modifier = Modifier.height(10.dp))
     }
-    data.forEach { info(it) }
-}
-
-private fun LazyListScope.info(text: String) {
-    item {
-        Surface(
-            shape = RoundedCornerShape(10.dp),
-            color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 2.dp,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 5.dp,
-                )
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(
-                    horizontal = 10.dp,
-                    vertical = 10.dp,
-                )
-            )
-        }
+    items(data) {info ->
+        InfoCard(text = info)
     }
 }
