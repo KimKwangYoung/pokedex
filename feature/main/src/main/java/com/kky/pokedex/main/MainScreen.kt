@@ -1,6 +1,5 @@
 package com.kky.pokedex.main
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,11 +31,11 @@ import com.kky.pokedex.domain.model.Pokemon
 import com.kky.pokedex.feature.common.theme.PokedexTheme
 import com.kky.pokedex.main.component.PagingLazyColumn
 import com.kky.pokedex.main.component.PokemonListItem
-import com.kky.pokedex.main.detail.PokemonDetailActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
+    onClickItem: (Pokemon) -> Unit,
     viewModel: MainViewModel = hiltViewModel(),
 ) {
     val state by viewModel.dataFlow.collectAsStateWithLifecycle()
@@ -86,6 +85,7 @@ fun MainScreen(
                                 data = uiState.data,
                                 showOnlyLike = showOnlyLike,
                                 loadAction = viewModel::loadPokemon,
+                                onClickItem = onClickItem,
                                 onClickLike = { pokemon ->
                                     viewModel.setLike(
                                         pokemon,
@@ -139,9 +139,9 @@ fun MainPokemonList(
     showOnlyLike: Boolean,
     loadAction: () -> Unit,
     onClickLike: (Pokemon) -> Unit,
+    onClickItem: (Pokemon) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val listItem: LazyListScope.() -> Unit = {
         items(
             data,
@@ -150,20 +150,8 @@ fun MainPokemonList(
             PokemonListItem(
                 pokemon = pokemon,
                 showOnlyLike = showOnlyLike,
-                onClickItem = {
-                    context.startActivity(
-                        Intent(
-                            context,
-                            PokemonDetailActivity::class.java
-                        ).putExtra(
-                            "id",
-                            pokemon.id
-                        )
-                    )
-                },
-                onClickLike = {
-                    onClickLike(pokemon)
-                }
+                onClickItem = { onClickItem(pokemon) },
+                onClickLike = { onClickLike(pokemon) },
             )
         }
     }

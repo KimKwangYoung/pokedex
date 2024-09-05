@@ -1,6 +1,5 @@
 package com.kky.pokedex.main.detail
 
-import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,8 +38,11 @@ import com.kky.pokedex.feature.main.R
 import com.kky.pokedex.main.component.InfoCard
 import com.kky.pokedex.main.component.PokedexImage
 
+const val POKEMON_ID = "id"
+
 @Composable
 fun DetailScreen(
+    onBackButtonClick: () -> Unit,
     viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -53,6 +54,7 @@ fun DetailScreen(
             PokemonDetailViewModel.UiState.Loading -> DetailLoading()
             is PokemonDetailViewModel.UiState.Success -> DetailContent(
                 data = state.data,
+                onBackButtonClick = onBackButtonClick,
                 onLikeClick = {
                     viewModel.toggleLike()
                 },
@@ -77,19 +79,15 @@ private fun DetailLoading() {
 @Composable
 private fun DetailContent(
     data: PokemonDetail,
+    onBackButtonClick: () -> Unit,
     onLikeClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(text = data.name) },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        if (context is Activity) {
-                            context.finish()
-                        }
-                    }) {
+                    IconButton(onClick = onBackButtonClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "",

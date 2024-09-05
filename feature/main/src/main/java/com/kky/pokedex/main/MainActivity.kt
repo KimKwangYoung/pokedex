@@ -1,27 +1,13 @@
 package com.kky.pokedex.main
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.Modifier
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.navigation.compose.rememberNavController
 import com.kky.pokedex.feature.common.theme.PokedexTheme
-import com.kky.pokedex.feature.main.R
-import com.kky.pokedex.feature.main.databinding.ActivityMainBinding
+import com.kky.pokedex.main.navigation.PokedexNavHost
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -30,8 +16,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
+            val navController = rememberNavController()
             PokedexTheme {
-                MainScreen()
+                PokedexNavHost(navController = navController)
             }
         }
     }
