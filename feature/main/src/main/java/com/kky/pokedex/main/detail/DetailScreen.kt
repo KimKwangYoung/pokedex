@@ -46,20 +46,16 @@ fun DetailScreen(
     viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
-    val state = uiState
-
-    PokedexTheme {
-        when (state) {
-            is PokemonDetailViewModel.UiState.Fail -> TODO()
-            PokemonDetailViewModel.UiState.Loading -> DetailLoading()
-            is PokemonDetailViewModel.UiState.Success -> DetailContent(
-                data = state.data,
-                onBackButtonClick = onBackButtonClick,
-                onLikeClick = {
-                    viewModel.toggleLike()
-                },
-            )
-        }
+    when (val state = uiState) {
+        is PokemonDetailViewModel.UiState.Fail -> TODO()
+        PokemonDetailViewModel.UiState.Loading -> DetailLoading()
+        is PokemonDetailViewModel.UiState.Success -> DetailContent(
+            data = state.data,
+            onBackButtonClick = onBackButtonClick,
+            onLikeClick = {
+                viewModel.toggleLike()
+            },
+        )
     }
 }
 

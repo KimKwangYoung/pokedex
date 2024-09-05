@@ -59,41 +59,36 @@ fun MainScreen(
     when (uiState) {
         is MainViewModel.MainUiState.Success -> {
             val showOnlyLike = uiState.showOnlyLike
-
-            PokedexTheme {
-                Scaffold(topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "1세대 포켓몬 도감",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                        },
-                    )
-                }) { paddingValue ->
-                    Box(
-                        modifier = Modifier
-                            .background(color = MaterialTheme.colorScheme.background)
-                            .padding(paddingValue),
-                    ) {
-                        Column {
-                            LikeFilterBar(
-                                checked = uiState.showOnlyLike,
-                                onCheckedChange = { checked -> viewModel.showOnlyLike(checked) },
-                            )
-                            MainPokemonList(
-                                data = uiState.data,
-                                showOnlyLike = showOnlyLike,
-                                loadAction = viewModel::loadPokemon,
-                                onClickItem = onClickItem,
-                                onClickLike = { pokemon ->
-                                    viewModel.setLike(
-                                        pokemon,
-                                        !pokemon.like
-                                    )
-                                }
-                            )
-                        }
+            Scaffold(topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "1세대 포켓몬 도감",
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    },
+                )
+            }) { paddingValue ->
+                Box(
+                    modifier = Modifier
+                        .background(color = MaterialTheme.colorScheme.background)
+                        .padding(paddingValue),
+                ) {
+                    Column {
+                        LikeFilterBar(
+                            checked = uiState.showOnlyLike,
+                            onCheckedChange = { checked -> viewModel.showOnlyLike(checked) },
+                        )
+                        MainPokemonList(data = uiState.data,
+                            showOnlyLike = showOnlyLike,
+                            loadAction = viewModel::loadPokemon,
+                            onClickItem = onClickItem,
+                            onClickLike = { pokemon ->
+                                viewModel.setLike(
+                                    pokemon,
+                                    !pokemon.like
+                                )
+                            })
                     }
                 }
             }
