@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kky.pokedex.domain.model.Pokemon
-import com.kky.pokedex.feature.common.theme.PokedexTheme
 import com.kky.pokedex.main.component.PagingLazyColumn
 import com.kky.pokedex.main.component.PokemonListItem
 
@@ -61,12 +60,7 @@ fun MainScreen(
             val showOnlyLike = uiState.showOnlyLike
             Scaffold(topBar = {
                 TopAppBar(
-                    title = {
-                        Text(
-                            text = "1세대 포켓몬 도감",
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    },
+                    title = { Text(text = "1세대 포켓몬 도감") },
                 )
             }) { paddingValue ->
                 Box(
@@ -79,7 +73,8 @@ fun MainScreen(
                             checked = uiState.showOnlyLike,
                             onCheckedChange = { checked -> viewModel.showOnlyLike(checked) },
                         )
-                        MainPokemonList(data = uiState.data,
+                        MainPokemonList(
+                            data = uiState.data,
                             showOnlyLike = showOnlyLike,
                             loadAction = viewModel::loadPokemon,
                             onClickItem = onClickItem,

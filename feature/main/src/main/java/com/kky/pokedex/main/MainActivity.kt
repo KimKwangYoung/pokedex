@@ -16,9 +16,8 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val navController = rememberNavController()
             PokedexTheme {
-                PokedexNavHost(navController = navController)
+                PokedexNavHost()
             }
         }
     }
