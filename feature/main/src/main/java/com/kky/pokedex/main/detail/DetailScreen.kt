@@ -37,8 +37,6 @@ import com.kky.pokedex.feature.main.R
 import com.kky.pokedex.main.component.InfoCard
 import com.kky.pokedex.main.component.PokedexImage
 
-const val POKEMON_ID = "id"
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(

@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val POKEMON_ID = "id"
+
 @HiltViewModel
 class PokemonDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
