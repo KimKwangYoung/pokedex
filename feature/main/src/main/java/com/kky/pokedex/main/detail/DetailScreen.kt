@@ -1,6 +1,5 @@
 package com.kky.pokedex.main.detail
 
-import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -28,68 +27,34 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kky.pokedex.domain.model.PokemonDetail
-import com.kky.pokedex.feature.common.theme.PokedexTheme
 import com.kky.pokedex.feature.main.R
 import com.kky.pokedex.main.component.InfoCard
 import com.kky.pokedex.main.component.PokedexImage
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
-    viewModel: PokemonDetailViewModel = hiltViewModel()
+    onBackButtonClick: () -> Unit, viewModel: PokemonDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.state.collectAsStateWithLifecycle()
     val state = uiState
-
-    PokedexTheme {
-        when (state) {
-            is PokemonDetailViewModel.UiState.Fail -> TODO()
-            PokemonDetailViewModel.UiState.Loading -> DetailLoading()
-            is PokemonDetailViewModel.UiState.Success -> DetailContent(
-                data = state.data,
-                onLikeClick = {
-                    viewModel.toggleLike()
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailLoading() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DetailContent(
-    data: PokemonDetail,
-    onLikeClick: () -> Unit,
-) {
-    val context = LocalContext.current
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = data.name) },
+                title = {
+                    Text(
+                        text = if (state is PokemonDetailViewModel.UiState.Success) state.data.name
+                        else ""
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        if (context is Activity) {
-                            context.finish()
-                        }
-                    }) {
+                    IconButton(onClick = onBackButtonClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "",
@@ -97,10 +62,12 @@ private fun DetailContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onLikeClick) {
-                        Image(
+                    IconButton(
+                        onClick = { viewModel.toggleLike() },
+                    ) {
+                        if (state is PokemonDetailViewModel.UiState.Success) Image(
                             painter = painterResource(
-                                id = if (data.like) R.drawable.favorite_24dp
+                                id = if (state.data.like) R.drawable.favorite_24dp
                                 else R.drawable.favorite_border_24dp
                             ),
                             contentDescription = "",
@@ -111,22 +78,35 @@ private fun DetailContent(
         },
     ) { paddingValue ->
         Box(
-            modifier = Modifier.padding(paddingValue)
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(paddingValue)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
-            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                item {
-                    ContentHeader(data = data)
-                }
-                section(
-                    "기본 스탯",
-                    data.stat.map { stat -> "${stat.name}\n기본 스탯: ${stat.baseStat}" },
-                )
-                section(
-                    "기본 능력",
-                    data.ability,
-                )
+            when (state) {
+                is PokemonDetailViewModel.UiState.Fail -> TODO()
+                PokemonDetailViewModel.UiState.Loading -> CircularProgressIndicator()
+                is PokemonDetailViewModel.UiState.Success -> DetailContent(data = state.data)
             }
         }
+    }
+}
+
+@Composable
+private fun DetailContent(data: PokemonDetail) {
+    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
+        item {
+            ContentHeader(data = data)
+        }
+        section(
+            "기본 스탯",
+            data.stat.map { stat -> "${stat.name}\n기본 스탯: ${stat.baseStat}" },
+        )
+        section(
+            "기본 능력",
+            data.ability,
+        )
     }
 }
 

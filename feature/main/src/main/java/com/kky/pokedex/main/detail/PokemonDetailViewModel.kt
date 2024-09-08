@@ -16,13 +16,15 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+const val POKEMON_ID = "id"
+
 @HiltViewModel
 class PokemonDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: PokemonRepository
 ): ViewModel() {
 
-    private val id: Int = savedStateHandle["id"] ?: throw NullPointerException("포켓몬 ID를 찾을 수 없습니다.")
+    private val id: Int = savedStateHandle[POKEMON_ID] ?: throw NullPointerException("포켓몬 ID를 찾을 수 없습니다.")
 
     private val _state = MutableStateFlow<UiState>(UiState.Loading)
     val state: StateFlow<UiState> = _state
