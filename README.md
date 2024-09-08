@@ -1,17 +1,15 @@
 # 1세대 포켓몬 도감
 
-Android 관련 기술을 적용해보고 공부하기 위한 프로젝트입니다.  
-Compose Migratrion 진행중입니다.(~ing)
+Android 관련 기술을 적용해보고 공부하기 위한 토이 프로젝트입니다.
 
 # 아키텍처
 
 안드로이드 권장 아키텍처 기반으로 작성하였습니다.  
 Layer에 맞게 모듈을 분리하고 MVVM Pattern을 적용하였습니다.
 
-![권장 아키텍처](https://github.com/user-attachments/assets/22737d5b-5d3c-4c97-afab-c630904b884f)
-
-
-![MVVM](https://github.com/user-attachments/assets/7395af0b-90c8-44a9-8100-1832d3cbdcd8)
+<p align="center"> <img src="https://github.com/user-attachments/assets/22737d5b-5d3c-4c97-afab-c630904b884f" align="center" width="45%">  
+  <img src="https://github.com/user-attachments/assets/7395af0b-90c8-44a9-8100-1832d3cbdcd8" align="center" width="45%">  
+</p>
 
 # 스크린샷
 
@@ -35,6 +33,7 @@ Layer에 맞게 모듈을 분리하고 MVVM Pattern을 적용하였습니다.
 * Room
 * Retrofit2
 * Gson
+* Compose
 * AAC ViewModel
 * Hilt
 * Glide
